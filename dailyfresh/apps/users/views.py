@@ -8,7 +8,8 @@ from itsdangerous import TimedJSONWebSignatureSerializer as Serializer, Signatur
 from django.core.mail import send_mail
 from celery_tasks.tasks import send_active_email
 from django.contrib.auth import authenticate,login,logout
-
+from utils.views import LoginRequiredMixin
+from models import Address
 # Create your views here.
 
 # def register(request):
@@ -80,7 +81,7 @@ class RegisterView(View):
         user.is_active = False
         user.save()
 
-        print("for test")
+        print('register done')
         # 将账号信息进行加密
         # serializer = Serializer(settings.SECRET_KEY, 60 * 60 * 2)
         # value = serializer.dumps({'id': user.id})  # 返回bytes
@@ -137,11 +138,15 @@ def exists(request):
 
 
 class LoginView(View):
+    """登陆"""
+
     def get(self,request):
+        """响应登录页面"""
         username=request.COOKIES.get('username','')
         return render(request,'login.html',{'title':'登录','username':username})
 
     def post(self,request):
+        """处理登陆逻辑"""
         #接收数据
         dict=request.POST
         username=dict.get('username')
@@ -163,8 +168,9 @@ class LoginView(View):
             return render(request,'login.html',{'err_msg':'用户名或密码填写不完整'})
 
 
-        #验证用户名、密码是否正确
+        #验证用户名、密码是否正确 : django用户认证系统判断是否登陆成功
         user=authenticate(username=username,password=pwd)
+        # 验证登陆失败
         if user is None:
             # context['err_msg']='用户名或密码错误'
             print("用户名或密码错误")
@@ -181,7 +187,8 @@ class LoginView(View):
         login(request,user)
         print("登陆成功")
 
-        response = redirect('/user/info')
+        # response = redirect('/user/info')
+        response = '登陆成功,转到用户中心'
         print('登陆成功,转到用户中心')
 
         # 是否记住用户名
@@ -190,6 +197,14 @@ class LoginView(View):
         else:
             response.delete_cookie('username')  # 删除cookie
 
+        # 登录成功,根据next参数决定跳转方向
+        next = request.GET.get('next')
+        if next is None:
+            # 如果是直接登录成功,就重定向到首页
+            return redirect('/goods/index')
+        else:
+            # 如果是用户中心重定向到登陆页面，就回到用户中心
+            redirect(next)
         # 转向用户中心
         return response
         # return HttpResponse("登陆成功")
@@ -204,3 +219,49 @@ def logout_user(request):
     # 退出后跳转：由产品经理设计
     # response = redirect('goods/index')
     return redirect('goods/index')
+
+
+class AddressView(LoginRequiredMixin,View):
+    """用户地址"""
+
+    def get(self,request):
+        """提供用户地址页面：如果验证失败重定向到登陆页面"""
+
+        # 从request中获取user对象，中间件从验证请求中的用户，所以request中带有user
+        user = request.user
+
+        try:
+            # 查询用户地址：根据创建时间排序，最近的时间在最前，取第1个地址
+            address = user.address_set.latest('create_time')  # latest('时间')函数：按照时间排序，最近的时间在最前，并取出第0个数据
+        except Address.DoesNotExist:
+            # 如果地址信息不存在
+            address = None
+
+        # 构造上下文
+        context = {
+            'address':address
+        }
+        # return HttpResponse('这是用户中心地址页面')
+        return render(request,'user_center_site.html',context)
+
+    def post(self,request):
+        """修改地址信息"""
+
+        # 接收地址表单数据
+        user = request.user
+        recv_name = request.POST.get('recv_name')
+        addr = request.POST.get('addr')
+        zip_code = request.POST.get('zip_codo')
+        recv_mobile = request.POST.get('recv_mobile')
+
+        # 参数校验
+        if all([recv_name, addr, zip_code, recv_mobile]):
+            # 保存地址信息到数据库
+            Address.objects.create(
+                user=user,
+                receiver_name=recv_name,
+                detail_addr=addr,
+                zip_code=zip_code,
+                receiver_mobile=recv_mobile
+            )
+        return redirect("users/address")

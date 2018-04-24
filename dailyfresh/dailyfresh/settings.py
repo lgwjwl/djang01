@@ -42,6 +42,7 @@ INSTALLED_APPS = (
     'goods',
     'orders',
     'cart',
+    'tinymce',
 )
 # django认证系统使用的用户模型
 AUTH_USER_MODEL = 'users.User'
@@ -111,7 +112,7 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/1.8/howto/static-files/
 
 STATIC_URL = '/static/'
-STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
+STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static'),]
 
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.163.com'
@@ -140,3 +141,21 @@ CACHES = {
 
 SESSION_ENGINE = "django.contrib.sessions.backends.cache"
 SESSION_CACHE_ALIAS = "default"
+
+LOGIN_URL = '/user/login'        # question:??? 用于指定装饰器@login_required验证失败后跳转到的路径
+
+
+#指定保存文件的类，在这个类中，可以编写上传文件到Fdfs的代码
+DEFAULT_FILE_STORAGE = 'utils.fastdfs.storage.FdfsStorage'
+#指定fdfs文件服务器读取文件的路径
+FDFS_SERVER='http://127.0.0.1:8888/'
+#指定fdfs配置文件
+FDFS_CLIENT=os.path.join(BASE_DIR, 'utils/fastdfs/fdfs_client.conf')
+
+
+#设置富文本编辑器的样式
+TINYMCE_DEFAULT_CONFIG = {
+  'theme': 'advanced', # 丰富样式
+  'width': 600,
+  'height': 400,
+}

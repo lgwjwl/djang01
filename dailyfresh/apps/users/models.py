@@ -1,12 +1,9 @@
 from django.db import models
-from itsdangerous import TimedJSONWebSignatureSerializer as Serializer, SignatureExpired
-# Create your models here.
-
 from django.contrib.auth.models import AbstractUser
 from utils.models import BaseModel
 from django.conf import settings
 from goods.models import GoodsSKU
-# from itsdangerous import TimedJSONWebSignatureSerializer as Serializer
+from itsdangerous import TimedJSONWebSignatureSerializer as Serializer
 
 class User(AbstractUser, BaseModel):
     """用户"""
@@ -22,11 +19,11 @@ class User(AbstractUser, BaseModel):
 
 class Address(BaseModel):
     """地址"""
-    user = models.ForeignKey(User,verbose_name="所属用户")
-    receiver_name = models.CharField(max_length=20,verbose_name="收件人")
-    receiver_mobile = models.CharField(max_length=11,verbose_name="联系电话")
-    detail_addr = models.CharField(max_length=256,verbose_name="详细地址")
-    zip_code = models.CharField(max_length=6,verbose_name="邮政编码")
+    user = models.ForeignKey(User, verbose_name="所属用户")
+    receiver_name = models.CharField(max_length=20, verbose_name="收件人")
+    receiver_mobile = models.CharField(max_length=11, verbose_name="联系电话")
+    detail_addr = models.CharField(max_length=256, verbose_name="详细地址")
+    zip_code = models.CharField(max_length=6, verbose_name="邮政编码")
 
-    class meta:
+    class Meta:
         db_table = "df_address"

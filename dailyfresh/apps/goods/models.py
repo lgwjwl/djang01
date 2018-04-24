@@ -1,14 +1,12 @@
 from django.db import models
 from utils.models import BaseModel
-# from tinymce.models import HTMLField
+from tinymce.models import HTMLField
 
-
-# Create your models here.
 class GoodsCategory(BaseModel):
     """商品类别表"""
-    name = models.CharField(max_length=20,verbose_name="名称")
-    logo = models.CharField(max_length=100,verbose_name="标识")
-    image = models.ImageField(upload_to="category",verbose_name="图片")
+    name = models.CharField(max_length=20, verbose_name="名称")
+    logo = models.CharField(max_length=100, verbose_name="标识")
+    image = models.ImageField(upload_to="category", verbose_name="图片")
 
     class Meta:
         db_table = "df_goods_category"
@@ -22,7 +20,7 @@ class GoodsCategory(BaseModel):
 class Goods(BaseModel):
     """商品SPU表"""
     name = models.CharField(max_length=100, verbose_name="名称")
-    desc = models.CharField(max_length=256,default="",blank=True,verbose_name="详细内容")
+    desc = HTMLField(verbose_name="详细介绍", default="", blank=True)
 
     class Meta:
         db_table = "df_goods"

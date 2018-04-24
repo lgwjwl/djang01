@@ -16,4 +16,5 @@ urlpatterns=[
     url('^exists$', views.exists),
     url('^login$', views.LoginView.as_view()),
     url(r'^logout$', views.logout_user),
+    url(r'^address$',views.AddressView.as_view(),name='address')
 ]
